@@ -25,6 +25,11 @@ From there, you could now count the number of PRO FILT'R HYDRATING LONGWEAR FOUN
 - The peak times when these products are purchased in large volumes.
 - How many users added these products to their cart and later removed them.
 
+Aside the following questions above, you will be in charge of Fenty’s data infrastructure, things like
+1. How can you enable Fenty to have a nation-wide presence → Scale?
+2. How do you store the data (tabular, partition, key-value store) because of performance and how quickly can the data be retrieved for analytical processes , modelling etc.
+
+
 
 #### The three Vs of big data:
 - Volume: The volume of data has grown substantially. Moving a thousand records from a database requires different tools and techniques than moving millions of rows or handling millions of transactions a minute.
@@ -58,3 +63,26 @@ nodes – this is most likely how you would run it in production. Airflow uses D
     engineers. 
 
 
+
+## DATA WAREHOUSING
+There are so many definitions for it
+- Is a system which includes (processes , technologies & data representations)that supports OLAP (Online Analytical Processes) 
+- A dataware house is a copy of transaction data specifically structured for analysis and query.
+- A data warehouse is a system that recieves and consolidates data periodically from the source system into a normalized data store for analytical processes.
+The lOGIC behind Data warehousing , EXTRACT from the source, TRANSFORM the data and LOAD it into a dimensional model.
+
+#### DIMENSION AND FACT TABLE
+In Data Warehouse Modeling, a star schema and a snowflake schema consists of Fact and Dimension tables.
+
+##### Fact Table:
+
+It contains all the primary keys of the dimension and associated facts or measures(is a property on which calculations can be made) like quantity sold, amount sold and average sales.
+Dimension Tables:
+
+##### Dimension Table
+It provides descriptive information for all the measurements recorded in fact table.
+Dimensions are relatively very small as comparison of fact table.
+Commonly used dimensions are people, products, place and time.
+
+![Dimension and Fact Table!](/images/dimension_facts.png "Dimension and Fact Table")
+Image source [Stackoverflow](https://stackoverflow.com/questions/20036905/difference-between-fact-table-and-dimension-table).
