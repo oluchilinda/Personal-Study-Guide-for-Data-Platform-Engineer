@@ -71,18 +71,33 @@ There are so many definitions for it
 - A data warehouse is a system that recieves and consolidates data periodically from the source system into a normalized data store for analytical processes.
 The lOGIC behind Data warehousing , EXTRACT from the source, TRANSFORM the data and LOAD it into a dimensional model.
 
+#### STAR SCHEMA AND SNOWFLAKE SCHEMA
+##### Star schema
+Star Schema  which the center of the star can have one fact table and a number of associated dimension tables. It is known as star schema as its structure resembles a star. The Star Schema data model is the simplest type of Data Warehouse schema. 
+![Star Schema!](/images/star.png "Star Schema")
+
+
+##### Snowflake Schema
+Is a logical arrangement of tables in a multidimensional database such that the ER diagram resembles a snowflake shape. A Snowflake Schema is an extension of a Star Schema, and it adds additional dimensions. The dimension tables are normalized which splits data into additional tables.
+![Snowflake Schema!](/images/snowflake.png "Snowflake Schema")
+
+
+Source  [Guru99](https://www.guru99.com/star-snowflake-data-warehousing.html).
+
+
 #### DIMENSION AND FACT TABLE
 In Data Warehouse Modeling, a star schema and a snowflake schema consists of Fact and Dimension tables.
 
 ##### Fact Table:
 
-It contains all the primary keys of the dimension and associated facts or measures(is a property on which calculations can be made) like quantity sold, amount sold and average sales.
-Dimension Tables:
+- It contains all the primary keys of the dimension and associated facts or measures(is a property on which calculations can be made) like quantity sold, amount sold and average sales.
+
 
 ##### Dimension Table
-It provides descriptive information for all the measurements recorded in fact table.
-Dimensions are relatively very small as comparison of fact table.
-Commonly used dimensions are people, products, place and time.
+- It provides descriptive information for all the measurements recorded in fact table.
+- Dimensions are relatively very small as comparison of fact table.
 
 ![Dimension and Fact Table!](/images/dimension_facts.png "Dimension and Fact Table")
 Image source [Stackoverflow](https://stackoverflow.com/questions/20036905/difference-between-fact-table-and-dimension-table).
+
+
