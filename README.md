@@ -47,14 +47,14 @@ up of a web server, a scheduler, a metastore, a queueing system, and executors. 
 run Airflow as a single instance, or you can break it up into a cluster with many executor
 nodes – this is most likely how you would run it in production. Airflow uses Directed Acyclic Graphs (DAGs)
 
-A DAG is Python code that specifies tasks. A graph is a series of nodes connected by a
-relationship or dependency. In Airflow, they are directed because they flow in a direction
-with each task coming after its dependency.
+    - A DAG is Python code that specifies tasks. A graph is a series of nodes connected by a
+    relationship or dependency. In Airflow, they are directed because they flow in a direction
+    with each task coming after its dependency.
 
-Apache NiFi
-Apache NiFi is another framework for building data engineering pipelines, and it too
-utilizes DAGs. Apache NiFi was built by the National Security Agency and is used
-at several federal agencies. Apache NiFi is easier to set up and is useful for new data
-engineers. 
+    - Apache NiFi
+    Apache NiFi is another framework for building data engineering pipelines, and it too
+    utilizes DAGs. Apache NiFi was built by the National Security Agency and is used
+    at several federal agencies. Apache NiFi is easier to set up and is useful for new data
+    engineers. 
 
 
