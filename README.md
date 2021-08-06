@@ -101,3 +101,12 @@ In Data Warehouse Modeling, a star schema and a snowflake schema consists of Fac
 Image source [Stackoverflow](https://stackoverflow.com/questions/20036905/difference-between-fact-table-and-dimension-table).
 
 
+### DATA WAREHOUSE ARCHICTECTURE 
+1. Kimballs
+- Atomic & summary data
+- An ETL process can serve multiple purpose e.g a particular data feature like data, product_id etc
+- Use conformed dimensions e.g if you are using ISO datetime format , use it throughout the date data.
+
+2. Independent Data Marts
+- Have different ETL processes designed for specific business departments to meet their analytical needs.
+- This is not really encouraged.
