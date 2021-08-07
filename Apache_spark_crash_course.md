@@ -6,17 +6,17 @@ There are many other big data tools and systems, each with its own use case. The
 
 Key hardware components.
 
-CPU (Central Processing Unit)
+- CPU (Central Processing Unit)
 The CPU is the "brain" of the computer. Every process on your computer is eventually handled by your CPU. This includes calculations and also instructions for the other components of the compute.
 A 2.5 Gigahertz CPU means that the CPU processes 2.5 billion operations per second. Let's say that for each operation, the CPU processes 8 bytes of data. How many bytes could this CPU process per second? (20 billion bytes per second)
 
-Memory (RAM)
+- Memory (RAM)
 When your program runs, data gets temporarily stored in memory before getting sent to the CPU. Memory is ephemeral storage - when your computer shuts down, the data in the memory is lost.
 
-Storage (SSD or Magnetic Disk)
+- Storage (SSD or Magnetic Disk)
 Storage is used for keeping data over long periods of time. When a program runs, the CPU will direct the memory to temporarily load data from long-term storage.
 
-Network (LAN or the Internet)
+- Network (LAN or the Internet)
 Network is the gateway for anything that you need that isn't stored on your computer. The network could connect to other computers in the same room (a Local Area Network) or to a computer on the other side of the world, connected over the internet.
 
 ![Hardware!](/images/Hardware.png "Hardware")
@@ -84,3 +84,8 @@ Spark has some limitation.
 ##### Data Wrangling with Spark
 Under the hood, spark is written in a programming langauage called scala, other it is written in scala, you can use it in other language such as Python , R or Java
 ![Dag!](/images/Dag.png "Dag")
+
+
+
+###### Sources
+1. [Udacity Nanodegree for Data Engineering](https://www.udacity.com/course/data-engineer-nanodegree--nd027)
