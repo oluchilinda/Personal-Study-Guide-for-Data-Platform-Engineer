@@ -50,7 +50,8 @@ Transforming data is a broad term that is signified by the T in an ETL or ELT pr
 simple as converting a timestamp stored in a table from one time zone to another. It can also be a more complex operation that
 creates a new metric from multiple source columns that are aggregated and filtered through some business logic.
 For example, for the sake of protecting personally identifiable information (PII) it may be desirable to turn an email address into a hashed value that is stored in the final destination
-###### Data modeling
+
+##### Data modeling
 Data modeling is a more specific type of data transformation. A data model structures and defines data in a format that is
 understood and optimized for data analysis. A data model is usually represented as one or more tables in a data warehouse.
 
