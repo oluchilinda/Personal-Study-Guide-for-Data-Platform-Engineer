@@ -25,3 +25,9 @@ The total number of nodes in a Redshift cluster is equal to the number of AWS EC
 
 A more advance and complex step 
 ![ETL AWS!](/images/ETL_advanced.png "ETL AWS")
+
+### Steps to watch out for when ingesting data
+- Break large files into simpler multiple files
+- Add a  prefix to the split multiple files 
+- Add a delimiter to the file when using it.
+- Make sure files you are ingesting are in same AWS Cloud region.
