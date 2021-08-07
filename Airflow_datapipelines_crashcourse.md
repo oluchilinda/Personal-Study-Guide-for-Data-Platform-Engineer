@@ -83,8 +83,69 @@ warehouse.
 For example, Task A must complete before Tasks B can start. Once they are both completed, then Task C can
 start. Once Task C is complete, the pipeline is completed as well.
 
+## Common Data Pipeline Patterns
+Pipelines are built with different goals and constraints. Such as
+- Must the data be processed in near real time? 
+- Can it be updated daily? 
+- Will it be modeled for use in a dashboard or as input to a machine learning model?
 
-#### Data Pipelines Pocket Reference
+#### ETL and ELT
+Both patterns are approaches to data processing used to feed data
+into a data warehouse and make it useful to analysts and reporting
+tools. 
+The difference between the two is the order of their final two steps (transform and load), but the design implications in choosing
+between them are substantial.
+
+- The extract step gathers data from various sources in preparation for loading and transforming. 
+- The load step brings either the raw data (in the case of ELT) or the fully transformed data (in the case of ETL) into the final destination.
+Either way, the end result is loading data into the data warehouse, data lake, or other destination.
+- The transform step is where the raw data from each source system is combined and formatted in a such a way that it’s useful to
+analysts, visualization tools, or whatever use case your pipeline is serving. 
+The combination of the extraction and loading steps is often referred to as data ingestion. 
+
+
+
+##### The Emergence of ELT over ETL
+ETL was the gold standard of data pipeline patterns for decades.
+Though it’s still used, more recently ELT has emerged as the pattern of choice. 
+###### Why? Prior to the modern breed of data warehouses,
+Initially data teams didn’t have access to data warehouses with the storage or compute necessary to
+handle loading vast amounts of raw data and transforming it into usable data models all in the same place.
+In addition, data warehouses at the time were row-based databases that worked well
+for transactional use cases, but not for the high-volume, bulk queries that are commonplace in analytics. Thus, data was first extracted
+from source systems and then transformed on a separate system before being loaded into a warehouse for any final data modeling
+and querying by analysts and visualization tools.
+
+The majority of today’s data warehouses are built on highly scalable columnar databases that can both store and run bulk transforms on
+large datasets in a cost-effective manner. Thanks to the I/O efficiency of a columnar database, data compression, and the ability
+to distribute data and queries across many nodes that can work together to process data, things have changed. 
+It’s now better to focus on extracting data and loading it into a data warehouse where
+you can then perform the necessary transformations to complete the pipeline.
+
+###### The impact of the difference between row-based and column-based data warehouses cannot be overstated. 
+### Relational DB
+- A relational database is ideal for transactional ( Online Transaction Processing (OLTP) )applications because it stores rows of data.
+- Incremental data loading
+- Queries against only a few rows
+
+
+### Columnar DB
+- A columnar database is preferred for analytical applications because it allows for fast retrieval of columns of data. Columnar databases are designed for data warehousing and big data processing because they scale using distributed clusters of low-cost hardware to increase throughput.
+- Columnar databases are column based. They are built for speed because when data is stored by column, you can skip non-relevant data and immediately read what you are looking for. This makes aggregation queries especially fast.
+- Columnar databases excel at Queries that involve only a few columns
+- Great for Aggregation queries against vast amounts of data
+- Column-wise compression
+
+In the image below, just imagine an ecommerce application that has a table that records customers details and order details of what they purchase, logically to query this data, you have to merge both row tables ( relational together) to get information for what analysis you intend to run, Columnar is much faster because each block contains data of the same type, making compression optimal.
+![columnar and row!](/images/columnar.png "columnar")
+
+
+#### EtLT Subpattern
+Some examples of the type of transformation that fits into the EtLT subpattern include the following:
+At times the steps are required as early in a pipeline as possible for legal or security reasons.
+- Deduplicate records in a table
+- Parse URL parameters into individual components
+- Mask or otherwise obfuscate sensitive data
 
 ##### Sources
 1. Data Pipelines Pocket Reference Book by James Densmore
