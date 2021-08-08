@@ -4,8 +4,11 @@ env
 *.conf
 rootkey.csv
 oluchipractise_accessKeys.csv
-
-
+secrets.env
+*.env
+secrets.json
+.vscode
+total_revenue_PG.csv
 
 # Created by https://www.toptal.com/developers/gitignore/api/terraform
 # Edit at https://www.toptal.com/developers/gitignore?templates=terraform

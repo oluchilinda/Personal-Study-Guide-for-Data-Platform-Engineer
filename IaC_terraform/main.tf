@@ -26,14 +26,26 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
+# Note that if you're using the --acl option, ensure that any associated IAM policies include the "s3:PutObjectAcl" action:
 data "aws_iam_policy_document" "example" {
   statement {
     actions   = ["s3:ListAllMyBuckets"]
-    resources = ["arn:aws:s3:::*"]
+    resources = [aws_s3_bucket.bucket.arn]
   }
   statement {
     actions   = ["s3:*"]
     resources = [aws_s3_bucket.bucket.arn]
+    effect    = "Allow"
+  }
+  statement {
+    actions   = ["s3:PutObject", "s3:PutObjectAcl", "s3:PutObjectTagging"]
+    resources = [aws_s3_bucket.bucket.arn]
+    effect    = "Allow"
+    # principals {
+    #   type        = "AWS"
+    #   identifiers = [aws_iam_user.new_user.arn]
+    # }
+
   }
 }
 
