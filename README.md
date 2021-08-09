@@ -1,4 +1,5 @@
 This an hands on experience with Data Ingestion, Data Transformation, Ochestrating pipelines , Data Validation in Pipelines, Measuring and Monitoring Pipeline Performance with Python in AWS Cloud.
+
 An extra benefit is , I used Terraform for infrastructure provisioning.
 
 #### Why Terraform
@@ -6,11 +7,11 @@ An extra benefit is , I used Terraform for infrastructure provisioning.
 -  It lets you define your cloud infrastructure in config/code , rebuild, break and track changes to infrastructure with ease. 
 If you are a Data Engineer, Senior Data Platform Engineer, Machine learning Engineer or Data Scientist trying to get into Data Engineering, you will find this repo helpful.
 
-Before diving into the hands-on experience, you can check some notes I wrote on the following concepts available  at the `notes` folder in this repository.
+Before diving into the hands-on experience, you can check some notes I wrote on the following concepts available  in the `notes` folder in this repository.
 
--  [Apache Spark]()
-- [Data Modelling]()
-- [Data Pipelines]()
+- [Apache Spark](https://github.com/oluchilinda/Personal-Study-Guide-for-Data-Platform-Engineer/blob/main/notes/Apache_spark_crash_course.md)
+- [Data Modelling](https://github.com/oluchilinda/Personal-Study-Guide-for-Data-Platform-Engineer/blob/main/notes/Datamodelling.md)
+- [Data Pipelines](https://github.com/oluchilinda/Personal-Study-Guide-for-Data-Platform-Engineer/blob/main/notes/Datapipelines.md)
 
 
 # HANDS ON EXPERIENCE
@@ -18,7 +19,7 @@ Before diving into the hands-on experience, you can check some notes I wrote on 
 python3 -m venv env
 source env/bin/activate
 pip install -r requirements.txt
-touch secrets.conf
+touch secrets.json
 ```
 Secrets.json contains all your secrets eg, aws acess keys, s3 bucket ARN , please do not commit it to version control
 Create an AWS Account and do with following below with terraform 
@@ -31,7 +32,6 @@ There are advantages to managing IAM policies in Terraform rather than manually 
 In the step below, I will create an IAM user with login credentials.
 In upcoming steps I will attach add more complex policies. The files responsible for infrastructure provisioning are in `Iac_terraform`folders
 
-##### Setup Keybase
 1. Download [Keybase](https://keybase.io/download), to learn more about Keybase, visit [here](https://book.keybase.io/docs/cli)
 2. Drag Keybase into your Applications folder & run it for MacOS users , create a keybase username and password.
 3. Run the following command below
@@ -137,7 +137,7 @@ $ terraform apply
 Output 
 ```shell
 Outputs:
-iam_arn = arn:aws:iam::90*******:user/oluchipractise
+iam_arn = arn:aws:iam::90*******:user/ol******
 password = wcF*****************S7hon4A
 ```
 6. Now decode your password, the password would be required when the user tries to sign in via AWS console as an iam user
