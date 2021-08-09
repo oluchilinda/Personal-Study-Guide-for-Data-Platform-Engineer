@@ -1,112 +1,488 @@
-##### DATA ENGINEERING
+This an hands on experience with Data Ingestion, Data Transformation, Ochestrating pipelines , Data Validation in Pipelines, Measuring and Monitoring Pipeline Performance with Python in AWS Cloud.
+An extra benefit is , I used Terraform for infrastructure provisioning.
 
-Data engineering is the development, operation, and maintenance of data infrastructure, either on-premises or in the   cloud (or hybrid or multi-cloud),comprising databases and pipelines to extract, transform, and load data.
+#### Why Terraform
+-  It allows you to have your  code in source control.
+-  It lets you define your cloud infrastructure in config/code , rebuild, break and track changes to infrastructure with ease. 
+If you are a Data Engineer, Senior Data Platform Engineer, Machine learning Engineer or Data Scientist trying to get into Data Engineering, you will find this repo helpful.
 
-At the lowest level, data engineering involves the movement of data from one system or
-format to another system or format. 
-Data engineers query data from a source (extract), they perform some modifications to the data (transform),and then they put that data in a location where users can access it and know that it is in production quality (load). 
-The combination of extracting, loading, and transforming data is accomplished by the creation of a data pipeline.
+Before diving into the hands-on experience, you can check some notes I wrote on the following concepts available  at the `notes` folder in this repository.
 
-Typical scenario why we need a data engineer
-
-An online store eg Fenty beauty  has a website where you can purchase different shades of foundations . The
-website is backed by a relational database. Every transaction is stored in the database. 
-The site grows and running queries on the production database is no longer practical, and they are various database that records site purchases in different geographical location e.g Asia, Europe, Africa, North America etc
-
-##### The executives or sales representatives could ask,
-
-How many *PRO FILT'R HYDRATING LONGWEAR FOUNDATION in shade (#110, #490, #150, #160 , #255)* were sold in  the last quarter?
+-  [Apache Spark]()
+- [Data Modelling]()
+- [Data Pipelines]()
 
 
-To answer the preceding question,a data engineer would create connections to all of the transactional databases for each region, extract the data, and load it into a data warehouse. 
-
-From there, you could now count the number of PRO FILT'R HYDRATING LONGWEAR FOUNDATION in shade (#110, #490, #150, #160 , #255) that were sold and answer further questions such as
-- Which geographical location sold the most foundation products.
-- The peak times when these products are purchased in large volumes.
-- How many users added these products to their cart and later removed them.
-
-Aside the following questions above, you will be in charge of Fenty’s data infrastructure, things like
-1. How can you enable Fenty to have a nation-wide presence → Scale?
-2. How do you store the data (tabular, partition, key-value store) because of performance and how quickly can the data be retrieved for analytical processes , modelling etc.
-
+# HANDS ON EXPERIENCE
+```shell
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+touch secrets.conf
+```
+Secrets.json contains all your secrets eg, aws acess keys, s3 bucket ARN , please do not commit it to version control
+Create an AWS Account and do with following below with terraform 
 
 
-#### The three Vs of big data:
-- Volume: The volume of data has grown substantially. Moving a thousand records from a database requires different tools and techniques than moving millions of rows or handling millions of transactions a minute.
-- Variety: Data engineers need tools that handle a variety of data formats in different locations (databases, APIs, files).
-- Velocity: The velocity of data is always increasing. Tracking the activity of millions of users on a social network or the purchases of users all over the world requires data engineers to operate often in near real time.
+### Provisioning Infrastructure
+Policies are JSON documents that define explicit allow/deny privileges to specific resources or resource groups.
+
+There are advantages to managing IAM policies in Terraform rather than manually in AWS. With Terraform, you can reuse your policy templates and ensure the principle of least privilege with resource interpolation.
+In the step below, I will create an IAM user with login credentials.
+In upcoming steps I will attach add more complex policies. The files responsible for infrastructure provisioning are in `Iac_terraform`folders
+
+##### Setup Keybase
+1. Download [Keybase](https://keybase.io/download), to learn more about Keybase, visit [here](https://book.keybase.io/docs/cli)
+2. Drag Keybase into your Applications folder & run it for MacOS users , create a keybase username and password.
+3. Run the following command below
+```shell
+sudo zsh -c "echo '/Applications/Keybase.app/Contents/SharedSupport/bin' > /etc/paths.d/Keybase"
+Keybase pgp gen
+```
+Output
+```shell
+Enter your real name, which will be publicly visible in your new key: <ADD NAME>
+Enter a public email address for your key: <ADD EMAIL>
+Enter another email address (or <enter> when done): 
+Push an encrypted copy of your new secret key to the Keybase.io server? [Y/n] y
+When exporting to the GnuPG keychain, encrypt private keys with a passphrase? [Y/n] y
+▶ INFO PGP User ID: o**** <ol********@gmail.com> [primary]
+▶ INFO Generating primary key (4096 bits)
+▶ INFO Generating encryption subkey (4096 bits)
+p▶ INFO Generated new PGP key:
+▶ INFO   user: o**** <ol********@gmail.com>
+▶ INFO   4096-bit RSA key, ID C******B, created 2021-08-09
+
+```
+4. Add the following code to the `main.tf` file in `Iac_terraform/iam_roles` folder
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.region
+}
 
 
-### Tools
-1. Programming language : Python
-2. Databases : MySQL and PostgresSQL
-3. Databases for Data warehousing :   Amazon Redshift, Google BigQuery, Apache Cassandra,  Elasticsearch.
-4. Data processing engines : allow data engineers to transform data whether it is in batches or streams. These engines allow the parallel execution of transformation tasks. The most popular engine is Apache Spark, Apache Kafka
-5. Data pipelines :Combining a transactional database, a programming language, a processing engine, and a data warehouse results in a pipeline. 
-Data pipelines need a scheduler to allow them to run at specified intervals. The simplest way to
-accomplish this is by using crontab. Schedule a cron job for your Python file and sit back
-and watch it run every X number of hours.
-The most popular framework for building data engineering pipelines in Python is Apache
-Airflow. Airflow is a workflow management platform built by Airbnb. Airflow is made
-up of a web server, a scheduler, a metastore, a queueing system, and executors. You can
-run Airflow as a single instance, or you can break it up into a cluster with many executor
-nodes – this is most likely how you would run it in production. Airflow uses Directed Acyclic Graphs (DAGs)
+resource "aws_iam_user" "new_user" {
+  name          = var.iam_name
+  path          = "/"
+  force_destroy = true
 
-    - A DAG is Python code that specifies tasks. A graph is a series of nodes connected by a
-    relationship or dependency. In Airflow, they are directed because they flow in a direction
-    with each task coming after its dependency.
+}
 
-    - Apache NiFi
-    Apache NiFi is another framework for building data engineering pipelines, and it too
-    utilizes DAGs. Apache NiFi was built by the National Security Agency and is used
-    at several federal agencies. Apache NiFi is easier to set up and is useful for new data
-    engineers. 
+resource "aws_iam_user_login_profile" "new_user" {
+  user    = aws_iam_user.new_user.name
+  pgp_key = "keybase:${var.KEYBASE_USERNAME}"
+  password_reset_required = true
+  lifecycle {
+    ignore_changes = [
+      password_length,
+      password_reset_required,
+      pgp_key,
+    ]
+  }
+}
 
 
+resource "aws_iam_user_policy" "password_change" {
+  name = "test"
+  user =aws_iam_user.new_user.name
 
-## DATA WAREHOUSING
-There are so many definitions for it
-- Is a system which includes (processes , technologies & data representations)that supports OLAP (Online Analytical Processes) 
-- A dataware house is a copy of transaction data specifically structured for analysis and query.
-- A data warehouse is a system that recieves and consolidates data periodically from the source system into a normalized data store for analytical processes.
-The lOGIC behind Data warehousing , EXTRACT from the source, TRANSFORM the data and LOAD it into a dimensional model.
+  policy = jsonencode({
+    Version = "2012-10-17"
+    "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iam:GetAccountPasswordPolicy",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iam:ChangePassword",
+      "Resource": "arn:aws:iam::${var.account_id}:user/${var.iam_name}"
+    }
+  ]
+  })
+}
+```
+5. Run the following commands in your terminal
 
-#### STAR SCHEMA AND SNOWFLAKE SCHEMA
-##### Star schema
-Star Schema  which the center of the star can have one fact table and a number of associated dimension tables. It is known as star schema as its structure resembles a star. The Star Schema data model is the simplest type of Data Warehouse schema. 
-![Star Schema!](/images/star.png "Star Schema")
+```shell
+terraform -version
+```
+Output:
+```shell
+Terraform v0.13.5
+
+Your version of Terraform is out of date! The latest version
+is 1.0.4. You can update by downloading from https://www.terraform.io/downloads.html
+```
+Export your AWS root access and secret keys to create your iam user and policies
+```shell
+$ cd Iac_terraform/iam_roles
+$ export AWS_ACCESS_KEY_ID="AK***************"
+$ export AWS_SECRET_ACCESS_KEY="con***********************"
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+Output 
+```shell
+Outputs:
+iam_arn = arn:aws:iam::90*******:user/oluchipractise
+password = wcF*****************S7hon4A
+```
+6. Now decode your password, the password would be required when the user tries to sign in via AWS console as an iam user
+```
+terraform output password | base64 --decode | keybase pgp decrypt
+```
+
+7. Visit your AWS console ( web service), change your password, once logged in , click on `My Security Credentials` ,create and download your secrets and access key
+![AWS console!](/images/aws_console_iam.png "AWS console")
 
 
-##### Snowflake Schema
-Is a logical arrangement of tables in a multidimensional database such that the ER diagram resembles a snowflake shape. A Snowflake Schema is an extension of a Star Schema, and it adds additional dimensions. The dimension tables are normalized which splits data into additional tables.
-![Snowflake Schema!](/images/snowflake.png "Snowflake Schema")
 
 
-Source  [Guru99](https://www.guru99.com/star-snowflake-data-warehousing.html).
 
 
-#### DIMENSION AND FACT TABLE
-In Data Warehouse Modeling, a star schema and a snowflake schema consists of Fact and Dimension tables.
+<!-- 
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
 
-##### Fact Table:
-
-- It contains all the primary keys of the dimension and associated facts or measures(is a property on which calculations can be made) like quantity sold, amount sold and average sales.
-
-
-##### Dimension Table
-- It provides descriptive information for all the measurements recorded in fact table.
-- Dimensions are relatively very small as comparison of fact table.
-
-![Dimension and Fact Table!](/images/dimension_facts.png "Dimension and Fact Table")
-Image source [Stackoverflow](https://stackoverflow.com/questions/20036905/difference-between-fact-table-and-dimension-table).
+provider "aws" {
+  region = var.region
+}
 
 
-### DATA WAREHOUSE ARCHICTECTURE 
-1. Kimballs
-- Atomic & summary data
-- An ETL process can serve multiple purpose e.g a particular data feature like data, product_id etc
-- Use conformed dimensions e.g if you are using ISO datetime format , use it throughout the date data.
+resource "aws_iam_user" "new_user" {
+  name = var.iam_user
+}
 
-2. Independent Data Marts
-- Have different ETL processes designed for specific business departments to meet their analytical needs.
-- This is not really encouraged.
+resource "aws_s3_bucket" "bucket" {
+  bucket = var.bucket_name
+  acl    = "private"
+
+  tags = {
+    Name        = "My bucket"
+    Environment = "Dev"
+  }
+}
+
+data "aws_iam_policy_document" "example" {
+  statement {
+    actions   = ["s3:ListAllMyBuckets"]
+    resources = ["arn:aws:s3:::*"]
+  }
+  statement {
+    actions   = ["s3:*"]
+    resources = [aws_s3_bucket.bucket.arn]
+  }
+}
+
+
+resource "aws_iam_policy" "policy" {
+  name        = "${random_pet.pet_name.id}_policy"
+  description = "My test policy for datawarehouse in cloud"
+
+  policy = data.aws_iam_policy_document.example.json
+
+}
+
+resource "aws_iam_user_policy_attachment" "attachment" {
+  user       = aws_iam_user.new_user.name
+  policy_arn = aws_iam_policy.policy.arn
+}
+
+``` -->
+
+
+<!-- Output:
+```shell
+<= data "aws_iam_policy_document" "example"  {
+      + id   = (known after apply)
+      + json = (known after apply)
+
+      + statement {
+          + actions   = [
+              + "s3:ListAllMyBuckets",
+            ]
+          + resources = [
+              + "arn:aws:s3:::*",
+            ]
+        }
+      + statement {
+          + actions   = [
+              + "s3:*",
+            ]
+          + resources = [
+              + (known after apply),
+            ]
+        }
+    }
+
+  # aws_iam_policy.policy will be created
+  + resource "aws_iam_policy" "policy" {
+      + arn         = (known after apply)
+      + description = "My test policy for datawarehouse in cloud"
+      + id          = (known after apply)
+      + name        = "s3Policy"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # aws_iam_user.new_user will be created
+  + resource "aws_iam_user" "new_user" {
+      + arn           = (known after apply)
+      + force_destroy = false
+      + id            = (known after apply)
+      + name          = "oluchipractise"
+      + path          = "/"
+      + tags_all      = (known after apply)
+      + unique_id     = (known after apply)
+    }
+
+  # aws_iam_user_policy_attachment.attachment will be created
+  + resource "aws_iam_user_policy_attachment" "attachment" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + user       = "oluchipractise"
+    }
+
+  # aws_s3_bucket.bucket will be created
+  + resource "aws_s3_bucket" "bucket" {
+      + acceleration_status         = (known after apply)
+      + acl                         = "private"
+      + arn                         = (known after apply)
+      + bucket                      = "oluchi-bucket-practise"
+      + bucket_domain_name          = (known after apply)
+      + bucket_regional_domain_name = (known after apply)
+      + force_destroy               = false
+      + hosted_zone_id              = (known after apply)
+      + id                          = (known after apply)
+      + region                      = (known after apply)
+      + request_payer               = (known after apply)
+      + tags                        = {
+          + "Environment" = "Dev"
+          + "Name"        = "My bucket"
+        }
+      + tags_all                    = {
+          + "Environment" = "Dev"
+          + "Name"        = "My bucket"
+        }
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
+
+      + versioning {
+          + enabled    = (known after apply)
+          + mfa_delete = (known after apply)
+        }
+    }
+
+Plan: 4 to add, 0 to change, 0 to destroy.
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+```
+
+```shell
+pply complete! Resources: 3 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+rendered_policy = {
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "arn:aws:s3:::*"
+    },
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": "arn:aws:s3:::oluchi-bucket-practise"
+    }
+  ]
+}
+``` -->
+
+
+<!-- ### Extracting Data from a MySQL Database
+Extracting data from a MySQL database can be done in two ways:
+- Full or incremental extraction using SQL : Full or incremental extraction using SQL is far simpler to implement,
+but also less scalable for large datasets with frequent changes.
+- Binary Log (binlog) replication : Binary Log replication, though more complex to implement, is better
+suited to cases where the data volume of changes in source tables is
+high, or there is a need for more frequent data ingestions from the
+MySQL source.
+
+
+First, you can install MySQL on your local machine or Alternatively, you can create a fully managed Amazon RDS for MySQL instance in AWS.
+It’s free to set up and run! Just remember to destroy the resources `terraform destroy`so you don't incur charges.
+For the sake of this tutorial and financial cost, I would use my local system
+I will populate it using the following example data available on MySQL (docs)[https://dev.mysql.com/doc/index-other.html]
+```text
+The Sakila sample database is made available by MySQL and is licensed via the New BSD license. Sakila contains data for a fictitious movie rental company and includes tables such as store, inventory, film, customer, and payment. 
+```
+#### Setting up mysql mac 
+```shell
+brew install mysql
+mysql_secure_installation
+brew services start mysql
+mysql -u root -p
+SOURCE /path_folder/Downloads/sakila-db/sakila-schema.sql;
+SOURCE /path_folder/Downloads/sakila-db/sakila-data.sql;
+USE sakila;
+SHOW FULL TABLES;
+```
+
+Output:
+```shell
+mysql> SHOW FULL TABLES;
++----------------------------+------------+
+| Tables_in_sakila           | Table_type |
++----------------------------+------------+
+| actor                      | BASE TABLE |
+| actor_info                 | VIEW       |
+| address                    | BASE TABLE |
+| category                   | BASE TABLE |
+| city                       | BASE TABLE |
+| country                    | BASE TABLE |
+| customer                   | BASE TABLE |
+| customer_list              | VIEW       |
+| film                       | BASE TABLE |
+| film_actor                 | BASE TABLE |
+| film_category              | BASE TABLE |
+| film_list                  | VIEW       |
+| film_text                  | BASE TABLE |
+| inventory                  | BASE TABLE |
+| language                   | BASE TABLE |
+| nicer_but_slower_film_list | VIEW       |
+| payment                    | BASE TABLE |
+| rental                     | BASE TABLE |
+| sales_by_film_category     | VIEW       |
+| sales_by_store             | VIEW       |
+| staff                      | BASE TABLE |
+| staff_list                 | VIEW       |
+| store                      | BASE TABLE |
++----------------------------+------------+
+```
+
+```python
+
+import csv
+import os
+
+import boto3
+import pymysql
+import json
+
+f = open('secrets.json')
+secret = json.load(f)
+
+
+hostname = secret["sql_hostname"]
+port = secret["sql_port"]
+username = secret["sql_username"]
+dbname = secret["sql_database"]
+password = secret["sql_password"]
+
+conn = pymysql.connect(host=hostname,
+        user=username,
+        password=password,
+        db=dbname,
+        port=int(port))
+
+if conn is None:
+  print("Error connecting to the MySQL database")
+else:
+  print("MySQL connection established!")
+
+# Calculate the total revenues generated from PG-rated film rentals where the cast includes an actor whose last name starts with S. 
+m_query = """ 
+    WITH actors_s AS
+ (SELECT actor_id, first_name, last_name
+ FROM actor
+ WHERE last_name LIKE 'S%'
+ ),
+ actors_s_pg AS
+ (SELECT s.actor_id, s.first_name, s.last_name,
+ f.film_id, f.title
+ FROM actors_s s
+ INNER JOIN film_actor fa
+ ON s.actor_id = fa.actor_id
+ INNER JOIN film f
+ ON f.film_id = fa.film_id
+ WHERE f.rating = 'PG'
+ ),
+ actors_s_pg_revenue AS
+ (SELECT spg.first_name, spg.last_name, p.amount
+ FROM actors_s_pg spg
+ INNER JOIN inventory i
+ ON i.film_id = spg.film_id
+ INNER JOIN rental r
+ ON i.inventory_id = r.inventory_id
+ INNER JOIN payment p
+ ON r.rental_id = p.rental_id
+ ) -- end of With clause
+ SELECT spg_rev.first_name, spg_rev.last_name,
+ sum(spg_rev.amount) tot_revenue
+ FROM actors_s_pg_revenue spg_rev
+ GROUP BY spg_rev.first_name, spg_rev.last_name
+ ORDER BY 3 desc;
+"""
+
+
+local_filename = "total_revenue_PG.csv"
+
+
+m_cursor = conn.cursor()
+m_cursor.execute(m_query)
+results = m_cursor.fetchall()
+
+with open(local_filename, 'w') as fp:
+  csv_w = csv.writer(fp, delimiter='|')
+  csv_w.writerows(results)
+
+fp.close()
+m_cursor.close()
+conn.close()
+
+# load the aws_boto_credentials values
+
+access_key = secret[ "root_AWSAccessKeyId"]
+secret_key = secret[ "root_AWSSecretKey"]
+bucket_name = secret["bucket_name"]
+
+s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+
+s3_file = local_filename
+
+s3.upload_file(local_filename, bucket_name, s3_file)
+
+``` -->
+
+
+<!-- Boto3 is the AWS SDK for Python would be installed with pip. -->

@@ -79,8 +79,8 @@ conn.close()
 
 # load the aws_boto_credentials values
 
-access_key = secret[ "root_AWSAccessKeyId"]
-secret_key = secret[ "root_AWSSecretKey"]
+access_key = secret[ "access_keys"]
+secret_key = secret[ "secret_keys"]
 bucket_name = secret["bucket_name"]
 
 s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
