@@ -152,6 +152,22 @@ terraform output password | base64 --decode | keybase pgp decrypt
 
 
 
+Note :
+If you encounter such error
+```shell
+Error: Error creating VPC: UnauthorizedOperation: You are not authorized to perform this operation. Encoded authorization failure message: oC_FNt4am4OcOAgD6ka3e2CWbC_Whvu7nmDMsg76UOCiIDixQdY5gQAH5vL4cf53vxaZ60w5_oklALPY44T6cDk7CwEbO9vsghU_9l
+```
+try to decode it with `aws sts`
+
+```shell
+aws sts decode-authorization-message --encoded-message oC_FNt4am4OcOAgD6ka3e2CWbC_Whvu7nmDMsg76UOCiIDixQdY5gQAH5vL4cf53vxaZ60w5_oklALPY44T6cDk7CwEbO9vsghU_9l
+```
+The preceding error message will indicates what action the Iam user is not allowed to do
+```shell
+\"action\":\""ec2:CreateTags"\",
+```
+
+
 
 <!-- 
 ```hcl

@@ -88,10 +88,64 @@ data "aws_iam_policy_document" "example" {
     effect = "Allow"
   }
 
+  # Create a VPC with a public subnet
+  statement {
+  sid = "VpcAccess"
+  actions =[
+    "ec2:CreateVpc", 
+    "ec2:CreateSubnet", 
+    "ec2:DescribeAvailabilityZones",
+    "ec2:CreateRouteTable", 
+    "ec2:CreateRoute", 
+    "ec2:CreateInternetGateway", 
+    "ec2:AttachInternetGateway", 
+    "ec2:AssociateRouteTable", 
+    "ec2:ModifyVpcAttribute",
+    "ec2:CreateTags"
+    
+  ]
+   resources = [
+      "*"
+    ]
+}
+#Modify and delete VPC resources
+statement{
+  effect =  "Allow"
+  actions =  ["ec2:DeleteInternetGateway"]
+  resources = ["arn:aws:ec2:*:*:internet-gateway/*"]
+}
+statement {
+  effect = "Allow"
+  actions = [
+      "ec2:DeleteRouteTable",
+      "ec2:CreateRoute",
+      "ec2:ReplaceRoute",
+      "ec2:DeleteRoute"
+  ]
+  resources =  ["arn:aws:ec2:*:*:route-table/*"]
+}
+
+# Manage security groups
+statement {
+  effect = "Allow"
+  actions = [
+      "ec2:AuthorizeSecurityGroupIngress",
+      "ec2:RevokeSecurityGroupIngress",
+      "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+      "ec2:AuthorizeSecurityGroupEgress",
+      "ec2:RevokeSecurityGroupEgress",
+      "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+      "ec2:ModifySecurityGroupRules",
+      "ec2:DeleteSecurityGroup" 
+  ]
+  resources =  ["arn:aws:ec2:*:*:security-group/*"]
+}
+
+
 }
 
 resource "aws_iam_policy" "policy" {
-  name        = "pipeline-policies"
+  name        = "pipelinepolicies"
   description = "My test policy for datawarehouse in cloud"
 
   policy = data.aws_iam_policy_document.example.json
