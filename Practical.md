@@ -8,21 +8,145 @@ touch secrets.conf
 secrets.json contains all your secrets eg, aws acess keys, s3 bucket ARN , please do not commit it to version control
 Create an AWS Account and do with following below with terraform 
 
-- Create IAM role and select use case  Redshift - Customizable with Permissions (`AmazonS3FullAccess`) and keep Access key ID and Secret access key
+<!-- - Create IAM role and select use case  Redshift - Customizable with Permissions (`AmazonS3FullAccess`) and keep Access key ID and Secret access key
 - Create an IAM user (attached with IAM role created above) to access your Redshift cluster.
 - Create a VPC group
 - Create security group roles with inbound rules.
 - Launch a Redshift Cluster with compute resources such as memory, ec2 instances
 - Create an S3 bucket and upload your log data
 - Create a PostgreSQL DB Instance using RDS and apply resource configuration setting
-- Destroy all resources when no longer in use
+- Destroy all resources when no longer in use -->
 
 ### Provisioning Infrastructure
 Policies are JSON documents that define explicit allow/deny privileges to specific resources or resource groups.
 
 There are advantages to managing IAM policies in Terraform rather than manually in AWS. With Terraform, you can reuse your policy templates and ensure the principle of least privilege with resource interpolation.
-In the step below, I will create an IAM user and an S3 bucket. Then, I will map permissions for that bucket with an IAM policy. 
+In the step below, I will create an IAM user with login credentials.
 In upcoming steps I will attach add more complex policies. The files responsible for infrastructure provisioning are in `Iac_terraform`folders
+
+##### Setup Keybase
+1. Download [Keybase](https://keybase.io/download), to learn more about Keybase, visit [here](https://book.keybase.io/docs/cli)
+2. Drag Keybase into your Applications folder & run it for MacOS users , create a keybase username and password.
+3. Run the following command below
+```shell
+sudo zsh -c "echo '/Applications/Keybase.app/Contents/SharedSupport/bin' > /etc/paths.d/Keybase"
+Keybase pgp gen
+```
+Output
+```shell
+Enter your real name, which will be publicly visible in your new key: <ADD NAME>
+Enter a public email address for your key: <ADD EMAIL>
+Enter another email address (or <enter> when done): 
+Push an encrypted copy of your new secret key to the Keybase.io server? [Y/n] y
+When exporting to the GnuPG keychain, encrypt private keys with a passphrase? [Y/n] y
+▶ INFO PGP User ID: o**** <ol********@gmail.com> [primary]
+▶ INFO Generating primary key (4096 bits)
+▶ INFO Generating encryption subkey (4096 bits)
+p▶ INFO Generated new PGP key:
+▶ INFO   user: o**** <ol********@gmail.com>
+▶ INFO   4096-bit RSA key, ID C******B, created 2021-08-09
+
+```
+4. Add the following code to the `main.tf` file in `Iac_terraform/iam_roles` folder
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.region
+}
+
+
+resource "aws_iam_user" "new_user" {
+  name          = var.iam_name
+  path          = "/"
+  force_destroy = true
+
+}
+
+resource "aws_iam_user_login_profile" "new_user" {
+  user    = aws_iam_user.new_user.name
+  pgp_key = "keybase:${var.KEYBASE_USERNAME}"
+  password_reset_required = true
+  lifecycle {
+    ignore_changes = [
+      password_length,
+      password_reset_required,
+      pgp_key,
+    ]
+  }
+}
+
+
+resource "aws_iam_user_policy" "password_change" {
+  name = "test"
+  user =aws_iam_user.new_user.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iam:GetAccountPasswordPolicy",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iam:ChangePassword",
+      "Resource": "arn:aws:iam::${var.account_id}:user/${var.iam_name}"
+    }
+  ]
+  })
+}
+```
+5. Run the following commands in your terminal
+
+```shell
+terraform -version
+```
+Output:
+```shell
+Terraform v0.13.5
+
+Your version of Terraform is out of date! The latest version
+is 1.0.4. You can update by downloading from https://www.terraform.io/downloads.html
+```
+Export your AWS root access and secret keys to create your iam user and policies
+```shell
+$ cd Iac_terraform/iam_roles
+$ export AWS_ACCESS_KEY_ID="AK***************"
+$ export AWS_SECRET_ACCESS_KEY="con***********************"
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+Output 
+```shell
+Outputs:
+iam_arn = arn:aws:iam::90*******:user/oluchipractise
+password = wcF*****************S7hon4A
+```
+6. Now decode your password, the password would be required when the user tries to sign in via AWS console as an iam user
+```
+terraform output password | base64 --decode | keybase pgp decrypt
+```
+
+7. Visit your AWS console ( web service), change your password, once logged in , click on `My Security Credentials` ,create and download your secrets and access key
+![AWS console!](/images/aws_console_iam.png "AWS console")
+
+
+
+
+
+
+<!-- 
 ```hcl
 terraform {
   required_providers {
@@ -77,27 +201,10 @@ resource "aws_iam_user_policy_attachment" "attachment" {
   policy_arn = aws_iam_policy.policy.arn
 }
 
-```
-```shell
-terraform -version
-```
-Output:
-```shell
-Terraform v0.13.5
+``` -->
 
-Your version of Terraform is out of date! The latest version
-is 1.0.4. You can update by downloading from https://www.terraform.io/downloads.html
-```
-Export your access keys 
-```shell
-$ export AWS_ACCESS_KEY_ID="AK***************"
-$ export AWS_SECRET_ACCESS_KEY="con***********************"
-$ terraform init
-$ terraform plan
-$ terraform plan
-```
 
-Output:
+<!-- Output:
 ```shell
 <= data "aws_iam_policy_document" "example"  {
       + id   = (known after apply)
@@ -212,11 +319,10 @@ rendered_policy = {
     }
   ]
 }
-```
-Visit your AWS console ( web service), click on the iam user and download the security credentials
-![AWS console!](/images/aws_console_iam.png "AWS console")
+``` -->
 
-### Extracting Data from a MySQL Database
+
+<!-- ### Extracting Data from a MySQL Database
 Extracting data from a MySQL database can be done in two ways:
 - Full or incremental extraction using SQL : Full or incremental extraction using SQL is far simpler to implement,
 but also less scalable for large datasets with frequent changes.
@@ -369,7 +475,7 @@ s3_file = local_filename
 
 s3.upload_file(local_filename, bucket_name, s3_file)
 
-```
+``` -->
 
 
 <!-- Boto3 is the AWS SDK for Python would be installed with pip. -->

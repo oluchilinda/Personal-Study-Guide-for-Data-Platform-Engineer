@@ -1,5 +1,5 @@
 .ipynb_checkpoints
-DS_Store
+*.DS_Store
 env
 *.conf
 rootkey.csv
@@ -9,6 +9,7 @@ secrets.env
 secrets.json
 .vscode
 total_revenue_PG.csv
+*.env
 
 # Created by https://www.toptal.com/developers/gitignore/api/terraform
 # Edit at https://www.toptal.com/developers/gitignore?templates=terraform
