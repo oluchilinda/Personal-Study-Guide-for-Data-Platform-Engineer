@@ -5,7 +5,7 @@ An extra benefit is , I used Terraform for infrastructure provisioning.
 #### Why Terraform
 -  It allows you to have your  code in source control.
 -  It lets you define your cloud infrastructure in config/code , rebuild, break and track changes to infrastructure with ease. 
-If you are a Data Engineer, Senior Data Platform Engineer, Machine learning Engineer or Data Scientist trying to get into Data Engineering, you will find this repo helpful.
+If you are a Data Engineer,  Data Platform Engineer, Machine learning Engineer or Data Scientist trying to get into Data Engineering, you will find this repo helpful.
 
 Before diving into the hands-on experience, you can check some notes I wrote on the following concepts available  in the `notes` folder in this repository.
 
