@@ -20,8 +20,8 @@ resource "aws_iam_user" "new_user" {
 }
 
 resource "aws_iam_user_login_profile" "new_user" {
-  user    = aws_iam_user.new_user.name
-  pgp_key = "keybase:${var.KEYBASE_USERNAME}"
+  user                    = aws_iam_user.new_user.name
+  pgp_key                 = "keybase:${var.KEYBASE_USERNAME}"
   password_reset_required = true
   lifecycle {
     ignore_changes = [
@@ -35,21 +35,48 @@ resource "aws_iam_user_login_profile" "new_user" {
 
 resource "aws_iam_user_policy" "password_change" {
   name = "test"
-  user =aws_iam_user.new_user.name
+  user = aws_iam_user.new_user.name
 
   policy = jsonencode({
     Version = "2012-10-17"
-    "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "iam:GetAccountPasswordPolicy",
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "iam:ChangePassword",
-      "Resource": "arn:aws:iam::${var.account_id}:user/${var.iam_name}"
-    }
-  ]
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "iam:GetAccountPasswordPolicy",
+        "Resource" : "*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : "iam:ChangePassword",
+        "Resource" : "arn:aws:iam::${var.account_id}:user/${var.iam_name}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_user_policy" "security_keys_access" {
+  name = "test"
+  user = aws_iam_user.new_user.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    "Statement" : [
+      {
+        "Sid" : "ListUsersForConsole",
+        "Effect" : "Allow",
+        "Action" : "iam:ListUsers",
+        "Resource" : "arn:aws:iam::*:*"
+      },
+      {
+        "Sid" : "ViewAndUpdateAccessKeys",
+        "Effect" : "Allow",
+        "Action" : [
+          "iam:UpdateAccessKey",
+          "iam:CreateAccessKey",
+          "iam:ListAccessKeys"
+        ],
+        "Resource" : "arn:aws:iam::${var.account_id}:user/${var.iam_name}"
+      }
+    ]
   })
 }
