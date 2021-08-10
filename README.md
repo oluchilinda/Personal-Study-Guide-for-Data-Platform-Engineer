@@ -27,6 +27,16 @@ Create an AWS Account and do with following below with terraform
 
 ### Provisioning Infrastructure
 Policies are JSON documents that define explicit allow/deny privileges to specific resources or resource groups.
+-  Create an AWS Account
+The following steps below would be done with terraform
+    - Create an IAM user a login credentials and keep Access key ID and Secret access key
+    - Create IAM role with Customizable Permissions (`AmazonS3ReadOnlyAccess`,`AmazonS3ReadOnlyAccess.` etc and attach policies to the Iam user.
+    - Create a VPC group
+    - Create security group roles with inbound rules.
+    - Launch a Redshift Cluster with compute resources such as memory, ec2 instances
+    - Create an S3 bucket and upload your log data
+    - Destroy all resources when no longer in use
+
 
 There are advantages to managing IAM policies in Terraform rather than manually in AWS. With Terraform, you can reuse your policy templates and ensure the principle of least privilege with resource interpolation.
 In the step below, I will create an IAM user with login credentials.

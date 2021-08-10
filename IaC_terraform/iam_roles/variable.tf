@@ -2,7 +2,7 @@ variable "region" {
   default = "us-west-1"
 }
 variable "iam_name" {
-  type    = string
+  type = string
 }
 variable "KEYBASE_USERNAME" {
   type        = string
@@ -11,6 +11,11 @@ variable "KEYBASE_USERNAME" {
 
 variable "account_id" {
 
+}
+variable "bucket_name" {}
+
+variable "redshift_arn" {
+  
 }
 
 

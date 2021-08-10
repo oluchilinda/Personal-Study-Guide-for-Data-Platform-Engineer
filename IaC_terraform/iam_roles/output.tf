@@ -5,7 +5,10 @@
 output "iam_arn" {
   value = aws_iam_user.new_user.arn
 }
-
-output "rendered_policy" {
-  value = data.aws_iam_policy_document.example.json
+output "redshift_role_iam_arn" {
+  value = aws_iam_role.redshift_role.arn
 }
+
+# output "rendered_policy" {
+#   value = data.aws_iam_policy_document.s3_buckets.json
+# }

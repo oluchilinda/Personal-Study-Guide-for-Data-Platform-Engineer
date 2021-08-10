@@ -32,129 +32,250 @@ resource "aws_iam_user_login_profile" "new_user" {
   }
 }
 
-data "aws_iam_policy_document" "example" {
-  # s3 policies
-  statement {
-    actions   = ["s3:ListAllMyBuckets"]
-    resources = ["*"]
-  }
-  statement {
-    actions   = ["s3:*"]
-    resources = ["*"]
-    effect    = "Allow"
-  }
-  statement {
-    actions   = ["s3:PutObject", "s3:PutObjectAcl", "s3:PutObjectTagging"]
-    resources = ["*"]
-    effect    = "Allow"
-  }
+resource "aws_iam_user_policy" "secret_keys_access" {
+  name = "secret-keys-access"
+  user = aws_iam_user.new_user.name
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "CreateOwnAccessKeys",
+        "Action" : [
+          "iam:CreateAccessKey",
+          "iam:GetUser",
+          "iam:ListAccessKeys"
 
-  # password change
-  statement {
-    actions   = ["iam:GetAccountPasswordPolicy"]
-    effect    = "Allow"
-    resources = ["*"]
-  }
-  statement {
-    effect    = "Allow"
-    actions   = ["iam:ChangePassword"]
-    resources = ["arn:aws:iam::${var.account_id}:user/${var.iam_name}"]
-  }
-
-  # security keys access
-  statement {
-    sid       = "ListUsersForConsole"
-    effect    = "Allow"
-    actions   = ["iam:ListUsers"]
-    resources = ["arn:aws:iam::*:*"]
-  }
-  statement {
-    effect    = "Allow"
-    actions   = ["iam:ChangePassword"]
-    resources = ["arn:aws:iam::${var.account_id}:user/${var.iam_name}"]
-  }
-  # reshift
-  statement {
-    sid = "AllowClusterManagement"
-    actions = [
-      "redshift:CreateCluster",
-      "redshift:DeleteCluster",
-      "redshift:ModifyCluster",
-      "redshift:RebootCluster"
+        ],
+        "Effect" : "Allow",
+        "Resource" : ["arn:aws:iam::${var.account_id}:user/${var.iam_name}"]
+      },
     ]
-    resources = [
-      "*"
-    ]
-    effect = "Allow"
-  }
+  })
+}
 
-  # Create a VPC with a public subnet
-  statement {
-  sid = "VpcAccess"
-  actions =[
-    "ec2:CreateVpc", 
-    "ec2:CreateSubnet", 
-    "ec2:DescribeAvailabilityZones",
-    "ec2:CreateRouteTable", 
-    "ec2:CreateRoute", 
-    "ec2:CreateInternetGateway", 
-    "ec2:AttachInternetGateway", 
-    "ec2:AssociateRouteTable", 
-    "ec2:ModifyVpcAttribute",
-    "ec2:CreateTags"
+
+
+resource "aws_iam_user_policy" "password_access" {
+  name = "password-access"
+  user = aws_iam_user.new_user.name
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Action" : [
+          "iam:GetAccountPasswordPolicy",
+          "iam:ChangePassword",
+          "iam:CreateRole",
+          "iam:PutRolePolicy",
+          "iam:CreateInstanceProfile",
+          "iam:AddRoleToInstanceProfile",
+          "iam:ListRoles",
+          "iam:GetPolicy",
+          "iam:GetInstanceProfile",
+          "iam:GetPolicyVersion",
+          "iam:AttachRolePolicy",
+          "iam:PassRole"
+          
+
+        ],
+        "Effect" : "Allow",
+        "Resource" : ["arn:aws:iam::${var.account_id}:user/${var.iam_name}"]
+      },
+      {
+      "Effect": "Allow",
+      "Action": [
+            "iam:GetRole",
+            "iam:PassRole",
+            "iam:CreateServiceLinkedRole"
+        ],
+      "Resource": ["${aws_iam_role.redshift_role.arn}"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+            "iam:CreateServiceLinkedRole"
+        ],
+      "Resource": ["arn:aws:iam::${var.account_id}:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift"]
+    },
+    ]
+  })
+}
+
+
+resource "aws_iam_policy" "redshift_access" {
+  name = "redshift-access"
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    Statement : [
+      {
+        "Sid" : "AllowClusterManagement"
+        "Action" : [
+          "redshift:*",
+          "redshift:CreateCluster",
+          "redshift:DeleteCluster",
+          "redshift:ModifyCluster",
+          "redshift:RebootCluster",
+          "redshift:CreateClusterSubnetGroup",
+          "redshift:CreateTags",
+          "redshift:DescribeClusters",
+          "redshift:DescribeClusterSubnetGroups",
+          "redshift:DeleteClusterSubnetGroup",
+          "redshift:DescribeLoggingStatus"
+
+        ],
+        "Effect" : "Allow",
+        "Resource" : "*"
+      },
+      
+    ]
+  })
+}
+
+
+resource "aws_iam_policy" "vpc_access" {
+  name = "vpc-access"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ec2:Describe*",
+          "ec2:CreateVpc",
+          "ec2:DeleteVpc",
+          "ec2:CreateSubnet",
+          "ec2:ModifySubnetAttribute",
+          "ec2:DeleteSubnet",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:CreateRouteTable",
+          "ec2:CreateRoute",
+          "ec2:CreateInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:AssociateRouteTable",
+          "ec2:ModifyVpcAttribute",
+          "ec2:CreateTags",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupEgress",
+          "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+          "ec2:ModifySecurityGroupRules",
+          "ec2:DeleteSecurityGroup",
+          "ec2:DeleteRouteTable",
+          "ec2:CreateRoute",
+          "ec2:ReplaceRoute",
+          "ec2:DeleteRoute"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+resource "aws_s3_bucket" "bucket_name" {
+  bucket = var.bucket_name
+  acl    = "private"
+
+  tags = {
+    Name        = "My bucket"
+    Environment = "Dev"
+  }
+}
+
+
+
+
+resource "aws_iam_role" "s3buckets" {
+  name               = "s3buckets_role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.account_id}:user/${var.iam_name}"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "redshift_role" {
+  name = "redshift_role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.account_id}:user/${var.iam_name}"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "redshift.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
     
   ]
-   resources = [
-      "*"
-    ]
 }
-#Modify and delete VPC resources
-statement{
-  effect =  "Allow"
-  actions =  ["ec2:DeleteInternetGateway"]
-  resources = ["arn:aws:ec2:*:*:internet-gateway/*"]
-}
-statement {
-  effect = "Allow"
-  actions = [
-      "ec2:DeleteRouteTable",
-      "ec2:CreateRoute",
-      "ec2:ReplaceRoute",
-      "ec2:DeleteRoute"
-  ]
-  resources =  ["arn:aws:ec2:*:*:route-table/*"]
-}
-
-# Manage security groups
-statement {
-  effect = "Allow"
-  actions = [
-      "ec2:AuthorizeSecurityGroupIngress",
-      "ec2:RevokeSecurityGroupIngress",
-      "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
-      "ec2:AuthorizeSecurityGroupEgress",
-      "ec2:RevokeSecurityGroupEgress",
-      "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
-      "ec2:ModifySecurityGroupRules",
-      "ec2:DeleteSecurityGroup" 
-  ]
-  resources =  ["arn:aws:ec2:*:*:security-group/*"]
+EOF
 }
 
 
-}
 
 resource "aws_iam_policy" "policy" {
-  name        = "pipelinepolicies"
-  description = "My test policy for datawarehouse in cloud"
+  name        = "test-policy"
+  description = "A test policy"
 
-  policy = data.aws_iam_policy_document.example.json
-
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:*",
+          "s3:ListAllMyBuckets",
+          "s3:PutObject",
+          "s3:PutObjectAcl",
+          "s3:PutObjectTagging"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
 }
 
-resource "aws_iam_user_policy_attachment" "attachment" {
-  user       = aws_iam_user.new_user.name
+
+resource "aws_iam_policy_attachment" "s3-attach" {
+  name       = "s3-attachment"
+  users      = [aws_iam_user.new_user.name]
+  roles      = [aws_iam_role.s3buckets.name]
   policy_arn = aws_iam_policy.policy.arn
 }
 
+resource "aws_iam_policy_attachment" "vpc-attach" {
+  name       = "vpc-attachment"
+  users      = [aws_iam_user.new_user.name]
+  policy_arn = aws_iam_policy.vpc_access.arn
+}
+
+
+resource "aws_iam_policy_attachment" "redshift-attach" {
+  name       = "redshift-attachment"
+  users      = [aws_iam_user.new_user.name]
+  roles      = [aws_iam_role.redshift_role.name]
+  policy_arn = aws_iam_policy.redshift_access.arn
+}
 
