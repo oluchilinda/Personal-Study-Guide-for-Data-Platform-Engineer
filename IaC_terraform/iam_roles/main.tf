@@ -53,7 +53,46 @@ resource "aws_iam_user_policy" "secret_keys_access" {
   })
 }
 
+resource "aws_iam_user_policy" "cloudwatch_full_access" {
+  name ="cloudwatch-access"
+  user = aws_iam_user.new_user.name
 
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "autoscaling:Describe*",
+                "cloudwatch:*",
+                "logs:*",
+                "ssm-incidents:ListResponsePlans",
+                "sns:*",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:GetRole"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "iam:CreateServiceLinkedRole",
+            "Resource": "*",
+            "Condition": {
+                "StringLike": {
+                    "iam:AWSServiceName": [
+                        "events.amazonaws.com",
+                        "ssm.alarms.cloudwatch.amazonaws.com",
+                        "ssm-incidents.alarms.cloudwatch.amazonaws.com"
+                    ]
+                }
+            }
+        }
+    ]
+
+  })
+  
+}
 
 resource "aws_iam_user_policy" "password_access" {
   name = "password-access"
